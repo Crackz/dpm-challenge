@@ -1,0 +1,11 @@
+version: "3"
+
+tasks:
+  init:
+    cmds:
+      - npm install
+    internal: true
+
+  run:
+    cmds:
+      - npm run dev

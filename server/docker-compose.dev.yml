@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  app:
+    container_name: dpm-app
+    build:
+      context: ./
+      target: development
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/app
+    networks:
+      dpm-network:
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16.3
+    container_name: dpm-postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: dpm
+      POSTGRES_USER: dpm
+      POSTGRES_PASSWORD: dpm
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+        dpm-network:
+
+  redis:
+      image: redis:7.4
+      container_name: dpm-redis
+      ports:
+          - 6379:6379
+      restart: unless-stopped
+      networks:
+        dpm-network:
+
+networks:
+   dpm-network:

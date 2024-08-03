@@ -1,0 +1,59 @@
+version: "3"
+
+tasks:
+  init:
+    cmds:
+      - npm install
+
+  log:
+    cmd: docker compose  -f docker-compose.dev.yml logs -f app
+
+  run:
+    cmds:
+      - docker compose -f docker-compose.dev.yml up -d --build
+      - task: log
+
+  stop:
+    cmds:
+      - docker compose -f docker-compose.dev.yml stop
+
+  restart:
+    cmds:
+      - docker compose -f docker-compose.dev.yml restart
+      - task: log
+
+  down:
+    cmds:
+      - docker compose -f docker-compose.dev.yml down -v
+
+  migration:create:
+    cmds:
+      - ./node_modules/.bin/typeorm-ts-node-commonjs migration:create ./src/migrations/{{.CLI_ARGS}}
+
+  migration:run:
+    env:
+      NODE_ENV: development
+    cmds:
+      - ./node_modules/.bin/typeorm-ts-node-commonjs migration:run  -d ./src/config/typeorm.ts
+
+  migration:revert:
+    env:
+      NODE_ENV: development
+    cmds:
+      - ./node_modules/.bin/typeorm-ts-node-commonjs migration:revert  -d ./src/config/typeorm.ts
+
+  resource:gen:
+    interactive: true
+    cmds:
+      - ./node_modules/.bin/nest generate resource
+
+  test:e2e:init:
+    cmds:
+      - docker compose -f docker-compose.testing.yml down
+      - docker compose -f docker-compose.testing.yml up -d
+  test:e2e:run:
+    interactive: true
+    env:
+      NODE_ENV: testing
+    cmds:
+      - npm run test:watch:e2e
