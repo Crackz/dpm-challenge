@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:16.3
+    container_name: test-dpm-postgres
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_DB: test-dpm
+      POSTGRES_USER: test-dpm
+      POSTGRES_PASSWORD: test-dpm
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+        test-dpm-network:
+
+  redis:
+      image: redis:7.4
+      container_name: test-dpm-redis
+      ports:
+          - 6380:6379
+      restart: unless-stopped
+      networks:
+        test-dpm-network:
+
+networks:
+   test-dpm-network:
